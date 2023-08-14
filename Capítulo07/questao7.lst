@@ -1,0 +1,209 @@
+Microsoft (R) Macro Assembler Version 14.35.32215.0	    06/03/23 23:46:58
+questao7.asm						     Page 1 - 1
+
+
+				;
+				;   Building Instructions:
+				;   ml /c /Fl"questao7.lst" /Cx /coff questao7.asm /link /SUBSYSTEM:console  /out:questao7.exe kernel32.lib legacy_stdio_definitions.lib msvcrt.lib
+				;
+				          .686
+				          .model  flat, c
+				          .stack  100h
+				printf    PROTO   arg1:Ptr Byte, printlist:VARARG
+				scanf     PROTO   arg2:Ptr Byte, inputlist:VARARG
+ 00000000			          .data
+ 00000000 25 64 00		in1fmt    byte   "%d", 0
+
+ 00000003 0A 25 73 25 64	msg1fmt   byte   0Ah, "%s%d", 0Ah, 0Ah, 0
+	   0A 0A 00
+ 0000000B 25 73 0A 00		msg2fmt   byte    "%s", 0Ah, 0
+ 0000000F 54 68 65 20 63	msg1      byte   "The contents of the accumulator are: ", 0
+	   6F 6E 74 65 6E
+	   74 73 20 6F 66
+	   20 74 68 65 20
+	   61 63 63 75 6D
+	   75 6C 61 74 6F
+	   72 20 61 72 65
+	   3A 20 00
+ 00000035 45 6E 74 65 72	msg2      byte   "Enter a number:  ", 0
+	   20 61 20 6E 75
+	   6D 62 65 72 3A
+	   20 20 00
+ 00000047 00000000		temp      sdword ?
+ 0000004B 00000003		three     sdword 3
+ 00000000			          .code
+				LOADACC   macro operand
+				          mov eax, operand   ;; load eax with the operand
+				          endm
+				ADDACC    macro operand
+				          add eax, operand   ;; add the operand to eax 
+				          endm
+				MULTACC   macro operand
+					      push ebx           ; save ebx and ecx
+				          push ecx
+				          mov ebx, eax       ; mov eax to ebx
+				          mov eax, 0         ; clear accumulator to zero
+				          mov ecx, operand   ;; load ecx with operand
+				          if operand LT 0    ;; if operand is negative
+				          neg ecx            ; make ecx positive for loop
+				          endif   
+				          .while ecx > 0
+				          add eax, ebx       ; repetitively add 
+				          dec ecx            ; decrement ecx
+				          .endw    
+				          if operand LT 0    ;; if operand is negative
+				          neg eax            ; negate accumulator, eax
+				          endif
+				          pop ecx            ; restore ecx and ebx
+				          pop ebx 
+				          endm
+ 00000000			INACC     proc 
+ 00000000  50			          push eax
+ 00000001  51			          push ecx
+ 00000002  52			          push edx
+				          INVOKE printf, ADDR msg2fmt, ADDR msg2
+				          INVOKE scanf, ADDR in1fmt, ADDR temp
+ 00000027  A1 00000047 R	          mov eax, temp
+ 0000002C  5A			          pop edx
+ 0000002D  59			          pop ecx
+ 0000002E  58			          pop eax
+ 0000002F  C3			          ret
+ 00000030			INACC     endp
+				STOREACC  macro operand
+				          mov operand, eax   ;; store eax to operand
+				          endm
+				SUBACC    macro operand
+				          sub eax, operand   
+				          endm
+				DIVACC    macro operand
+				          if operand EQ 0    
+				               ret 
+				          else 
+				          push edx
+				          push ebx
+				          mov temp, 0
+				          if eax LT 0
+				          mov temp, eax
+				          neg neg eax
+				          endif
+				          mov edx,eax
+				          mov eax, 0
+				          if operand LT 0    
+				          neg operand       
+				          endif
+				          .while( edx >= operand)
+				          sub edx, operand
+				          inc eax
+				          .endw
+				          if operand LT 0    
+				          neg eax 
+				          endif 
+				          if temp LT 0
+				          neg eax
+				          endif
+				          pop ebx
+				          pop edx
+				          endif
+				          endm
+ 00000030			OUTACC    proc
+ 00000030  50				      push eax           ;; save ebx and ecx, and edx
+ 00000031  51			          push ecx
+ 00000032  52			          push edx
+ 00000033  A3 00000047 R	          mov temp, eax
+				          INVOKE printf, ADDR msg1fmt, ADDR msg1, temp
+ 00000050  5A				      pop edx            ;; save ebx and ecx, and edx
+ 00000051  59			          pop ecx
+ 00000052  58			          pop eax
+ 00000053  C3			          ret       
+ 00000054			OUTACC    endp
+ 00000054			main      proc 
+ 00000054  B8 00000014		          mov EAX, 20
+				          SUBACC 3
+ 00000059  83 E8 03	     1	          sub eax, 3   
+ 0000005C  E8 FFFFFFCF		          CALL    OUTACC
+ 00000061  E8 FFFFFF9A		          CALL    INACC
+ 00000066  E8 FFFFFFC5		          CALL   OUTACC
+				          STOREACC three
+ 0000006B  A3 0000004B R     1	          mov three, eax   
+ 00000070  E8 FFFFFFBB		          CALL    OUTACC
+				          DIVACC 2
+ 00000075  52		     1	          push edx
+ 00000076  53		     1	          push ebx
+ 00000077  C7 05 00000047 R  1	          mov temp, 0
+	   00000000
+			     1	          endif
+questao7.asm(112) : error A2095:constant or relocatable label expected
+ DIVACC(7): Macro Called From
+  questao7.asm(112): Main Line Code
+ 00000081  8B D0	     1	          mov edx,eax
+ 00000083  B8 00000000	     1	          mov eax, 0
+ 0000008A  83 EA 02	     1	          sub edx, 2
+ 0000008D  40		     1	          inc eax
+ 00000093  5B		     1	          pop ebx
+ 00000094  5A		     1	          pop edx
+ 00000095  E8 FFFFFF96		          CALL    OUTACC
+ 0000009A  C3			          ret
+ 0000009B			main      endp
+				          end          
+Microsoft (R) Macro Assembler Version 14.35.32215.0	    06/03/23 23:46:58
+questao7.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+ADDACC . . . . . . . . . . . . .	Proc
+DIVACC . . . . . . . . . . . . .	Proc
+LOADACC  . . . . . . . . . . . .	Proc
+MULTACC  . . . . . . . . . . . .	Proc
+STOREACC . . . . . . . . . . . .	Proc
+SUBACC . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000004F Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000009B Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+INACC  . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000030 Public C
+OUTACC . . . . . . . . . . . . .	P Near	 00000030 _TEXT	Length= 00000024 Public C
+main . . . . . . . . . . . . . .	P Near	 00000054 _TEXT	Length= 00000047 Public C
+printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000001h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+in1fmt . . . . . . . . . . . . .	Byte	 00000000 _DATA	
+msg1fmt  . . . . . . . . . . . .	Byte	 00000003 _DATA	
+msg1 . . . . . . . . . . . . . .	Byte	 0000000F _DATA	
+msg2fmt  . . . . . . . . . . . .	Byte	 0000000B _DATA	
+msg2 . . . . . . . . . . . . . .	Byte	 00000035 _DATA	
+temp . . . . . . . . . . . . . .	DWord	 00000047 _DATA	
+three  . . . . . . . . . . . . .	DWord	 0000004B _DATA	
+
+	   0 Warnings
+	   2 Errors

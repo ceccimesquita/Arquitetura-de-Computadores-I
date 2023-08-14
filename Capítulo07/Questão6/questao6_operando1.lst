@@ -1,0 +1,126 @@
+Microsoft (R) Macro Assembler Version 14.35.32215.0	    06/03/23 22:49:40
+questao6.asm						     Page 1 - 1
+
+
+				;
+				;   Building Instructions:
+				;   ml /c /Fl"questao6.lst" /Cx /coff questao6.asm /link /SUBSYSTEM:console  /out:questao6.exe kernel32.lib legacy_stdio_definitions.lib msvcrt.lib
+				;   ml /Cx /coff questao6.asm /link /SUBSYSTEM:console /out:questao6.exe kernel32.lib legacy_stdio_definitions.lib msvcrt.lib
+
+				        .686
+				        .model  flat, c
+				        .stack  100h
+				printf  PROTO   arg1:Ptr Byte, printlist:VARARG
+				scanf   PROTO   arg2:Ptr Byte, inputlist:VARARG
+ 00000000			        .data
+ 00000000 0A 25 73 25 64	msg1fmt byte   0Ah, "%s%d%s%d%s%d",0Ah,0 
+	   25 73 25 64 25
+	   73 25 64 0A 00
+
+ 0000000F 50 61 72 61 20	msg1    byte    "Para x = ", 0
+	   78 20 3D 20 00
+ 00000019 20 6D 75 6C 74	msg2    byte    " multiplicado por y = ", 0
+	   69 70 6C 69 63
+	   61 64 6F 20 70
+	   6F 72 20 79 20
+	   3D 20 00
+ 00000030 20 6F 20 72 65	msg3    byte    " o resultado e: ", 0
+	   73 75 6C 74 61
+	   64 6F 20 65 3A
+	   20 00
+ 00000041 0000000A		x      sdword 10
+
+ 00000045 00000005		y      sdword 5
+
+ 00000049 00000000		result  sdword 0
+
+ 00000000			     .code
+				MULACC  MACRO   operand
+				          if operand EQ 0
+				               mov eax, 0
+				          elseif operand EQ 1
+				               nop
+				          else
+				               push ebx
+				               push ecx
+				               mov ebx, eax
+				               mov eax, 0
+				               mov ecx, operand
+				               if operand LT 0
+				                    neg ecx
+				               endif
+				               .while ecx > 0
+				                    add eax, ebx
+				                    dec ecx
+				               .endw
+				               if operand LT 0
+				                    neg eax
+				               endif
+				               pop ecx
+				               pop ebx
+				          endif
+				       ENDM
+				          
+ 00000000			main    proc
+ 00000000  A1 00000041 R	          mov eax, x
+				          MULACC 0
+ 00000005  B8 00000000	     1	               mov eax, 0
+ 0000000A  A3 00000049 R	          mov result, eax
+				          INVOKE  printf, ADDR msg1fmt, ADDR msg1, x, ADDR msg2, y, ADDR msg3, result
+ 0000003D			main    endp
+				        end
+Microsoft (R) Macro Assembler Version 14.35.32215.0	    06/03/23 22:49:40
+questao6.asm						     Symbols 2 - 1
+
+
+
+
+Macros:
+
+                N a m e                 Type
+
+MULACC . . . . . . . . . . . . .	Proc
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+STACK  . . . . . . . . . . . . .	32 Bit	 00000100 Para	  Stack	  'STACK'	 
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000004D Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000003D Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000003D Public C
+printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000001h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+msg1fmt  . . . . . . . . . . . .	Byte	 00000000 _DATA	
+msg1 . . . . . . . . . . . . . .	Byte	 0000000F _DATA	
+msg2 . . . . . . . . . . . . . .	Byte	 00000019 _DATA	
+msg3 . . . . . . . . . . . . . .	Byte	 00000030 _DATA	
+result . . . . . . . . . . . . .	DWord	 00000049 _DATA	
+x  . . . . . . . . . . . . . . .	DWord	 00000041 _DATA	
+y  . . . . . . . . . . . . . . .	DWord	 00000045 _DATA	
+
+	   0 Warnings
+	   0 Errors
